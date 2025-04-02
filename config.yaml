@@ -1,0 +1,15 @@
+input_directory: "/data/mini_data" # files has to be file_1.fastq or file_2.fastq
+output_directory: "/data/output"
+host_genome: "/data/ecoli_genome/GCA_000005845.2_ASM584v2_genomic.fna"
+threads: 12
+assembler: "megahit"  # Options: spades or megahit
+assembler_mode: 'meta' # if use spades please choose 'meta' or 'isolate'; if use assembler megahit, it is only for metagenomics. 
+binning: true # so far does not support different binner, only comebin is supported. metadecoder [no further updates, due to no money, not ready to use], or comebin [best in performance, better use GPU because cpu is slow]
+metaphlan_db: '/data/metaphlan_db' # directory to donwload metaphlan4 database. 
+
+reference: "/path/to/reference_genome.fasta"
+taxonomy_tool: 'metaphlan4' # choose metaphlan4 or kraken
+kraken2_db: "/path/to/kraken2_db" # if use kraken 
+trimmomatic_quality: 20
+primer: "/path/to/adapters.fa"
+mapping_tool: "bwa-mem2"  # Options: bwa-mem2, kma, bowtie2
