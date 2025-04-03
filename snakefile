@@ -15,8 +15,8 @@ rule all:
         config["output_directory"] + "/.multiqc.done",
         assembly,
         config["output_directory"] + "/.binning.done",
-        config["output_directory"] + "/.metaphlan.db.done"
-        #config["output_directory"] + "/.metaphlan.taxonomy.done"
+        config["output_directory"] + "/.metaphlan.db.done",
+        config["output_directory"] + "/.metaphlan.taxonomy.done"
 
 
 
