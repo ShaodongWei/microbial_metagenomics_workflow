@@ -58,7 +58,7 @@ rule remove_host:
         output = config["output_directory"],
         host_genome = config["host_genome"]
     conda:
-        "env/other.yaml"
+        "env/remove_host.yaml"
     shell:
         """
         mkdir -p {params.output}/clean_fastq
