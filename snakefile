@@ -7,6 +7,19 @@ elif config["assembler"] == "megahit":
 else:
     raise ValueError("Unknown assembler: " + config["assembler"])
 
+if config['run_binning']:
+    binning = config["output_directory"] + "/.semibin.done"
+else: 
+    binning = None
+
+if config['functional_profiling']:
+    functional_profiling = config["output_directory"] + "/.humann.done",
+    human_db = config["output_directory"] + "/.humann.chocophlan.done"
+else: 
+    functional_profiling = None,
+    human_db = None
+
+
 
 rule all:
     input:
@@ -14,9 +27,12 @@ rule all:
         config["output_directory"] + "/.remove_host.done",
         config["output_directory"] + "/.multiqc.done",
         assembly,
-        config["output_directory"] + "/.binning.done",
+        binning if config['run_binning'] else [],
         config["output_directory"] + "/.metaphlan.db.done",
-        config["output_directory"] + "/.metaphlan.taxonomy.done"
+        config["output_directory"] + "/.metaphlan.taxonomy.done",
+        functional_profiling if config['functional_profiling'] else [],
+        human_db if config['functional_profiling'] else []
+        
 
 
 
@@ -151,7 +167,9 @@ rule megahit_assembly:
             r2=$(echo "$r1" | sed 's/1.fastq$/2.fastq/')
             basename=$(basename "$r1")
             sample_prefix=$(echo "$basename" | sed 's/_1.fastq$//')
+            
             megahit -1 $r1 -2 $r2 -o {params.output}/assembly/"$sample_prefix" -t {params.threads} > {params.output}/assembly/"$sample_prefix".megahit.log 2>&1
+            mv {params.output}/assembly/"$sample_prefix".megahit.log {params.output}/assembly/"$sample_prefix"
         done
 
         touch {output}
@@ -161,13 +179,13 @@ rule binning:
     input:
         assembly
     output:
-        config["output_directory"] + "/.binning.done"
+        config["output_directory"] + "/.semibin.done"
     params:
         output = config["output_directory"],
         threads = config["threads"],
         assembler = config["assembler"]
     conda:
-        "env/comebin.yaml"
+        "env/semibin.yaml"
     shell:
         """
         mkdir -p {params.output}/binning
@@ -175,171 +193,59 @@ rule binning:
         if [[ -f {params.output}/samples.txt ]]; then rm {params.output}/samples.txt; fi
         find {params.output}/clean_fastq -name "*1.fastq" | while read -r file; do basename $file | cut -d_ -f1 | sort | uniq >> {params.output}/samples.txt;done 
 
-
         while read sample; do
-            echo "Processing $sample"
 
             if [[ {params.assembler} == 'spades' ]]; then
+                
+                mkdir -p {params.output}/binning/$sample
 
                 # Alignment
                 minimap2 -ax sr -t {params.threads} \
                     {params.output}/assembly/$sample/scaffolds.fasta \
                     {params.output}/clean_fastq/"$sample"_1.fastq \
                     {params.output}/clean_fastq/"$sample"_2.fastq \
-                    > {params.output}/binning/"$sample".alignment.sam
-
+                    > {params.output}/binning/"$sample"/"$sample".alignment.sam
+                
                 # convert sam to bam 
-                samtools view -hb {params.output}/binning/"$sample".alignment.sam | \
-                samtools sort -o {params.output}/binning/"$sample".alignment.sorted.bam
+                samtools view -hb {params.output}/binning/"$sample"/"$sample".alignment.sam | \
+                samtools sort -o {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam
 
                 # delete sam file 
-                rm {params.output}/binning/"$sample".alignment.sam
+                rm {params.output}/binning/"$sample"/"$sample".alignment.sam
 
-                # combebin -p is directory,
-                run_comebin.sh -a {params.output}/assembly/$sample/scaffolds.fasta \
-                -o  {params.output}/binning/$sample\
-                -p {params.output}/binning  \
-                -t {params.threads}
+                
+                SemiBin2 single_easy_bin --input-fasta {params.output}/assembly/$sample/scaffolds.fasta --input-bam {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam --environment human_gut --output {params.output}/binning/$sample
+
             else
+
+                mkdir -p {params.output}/binning/$sample
+
                 # Alignment
                 minimap2 -ax sr -t {params.threads} \
                     {params.output}/assembly/$sample/final.contigs.fa \
                     {params.output}/clean_fastq/"$sample"_1.fastq \
                     {params.output}/clean_fastq/"$sample"_2.fastq \
-                    > {params.output}/binning/"$sample".alignment.sam
+                    > {params.output}/binning/"$sample"/"$sample".alignment.sam
 
                 # convert sam to bam 
-                samtools view -hb {params.output}/binning/"$sample".alignment.sam | \
-                samtools sort -o {params.output}/binning/"$sample".alignment.sorted.bam
+                samtools view -hb {params.output}/binning/"$sample"/"$sample".alignment.sam | \
+                samtools sort -o {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam
 
                 # delete sam file 
-                rm {params.output}/binning/"$sample".alignment.sam
+                #rm {params.output}/binning/"$sample"/"$sample".alignment.sam
 
-                # combebin -p is directory,
-                run_comebin.sh -a {params.output}/assembly/$sample/final.contigs.fa \
-                -o  {params.output}/binning/$sample\
-                -p {params.output}/binning  \
-                -t {params.threads}
+                
+                SemiBin2 single_easy_bin --input-fasta {params.output}/assembly/$sample/final.contigs.fa --input-bam {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam --environment human_gut --output {params.output}/binning/$sample
+
             fi
-
+            
+            
+            
         done < {params.output}/samples.txt
 
-        # rm -f samples.txt
+        rm -f samples.txt
         touch {output}
         """
-
-
-
-# rule binning:
-#     input:
-#         assembly
-#     output:
-#         config["output_directory"] + "/.binning.done"
-#     params:
-#         output = config["output_directory"],
-#         threads = config["threads"],
-#         assembler = config["assembler"]
-#     conda:
-#         "env/metadecoder.yaml"
-#     shell:
-#         """
-#         mkdir -p {params.output}/binning
-
-#         if [[ -f {params.output}/samples.txt ]]; then rm {params.output}/samples.txt; fi
-#         find {params.output}/clean_fastq -name "*1.fastq" | while read -r file; do basename $file | cut -d_ -f1 | sort | uniq >> {params.output}/samples.txt;done 
-
-#         # not knowing why the dependency fraggenescan has no permission 
-#         #chmod +x $(pwd)/.snakemake/conda/fccdad0af2863466fb6cf6d8a303b12d_/lib/python3.13/site-packages/metadecoder/fraggenescan
-#         chmod +x $(pwd)/.snakemake/conda/8b37a24dbb6a344e5a1b463c89fe6e71_/lib/python3.13/site-packages/metadecoder/fraggenescan 
-        
-#         while read sample; do
-#             echo "Processing $sample"
-#             mkdir -p {params.output}/binning/$sample
-
-#             if [[ {params.assembler} == 'spades' ]]; then
-#                 # Alignment
-#                 minimap2 -ax sr -t {params.threads} \
-#                     {params.output}/assembly/$sample/scaffolds.fasta \
-#                     {params.output}/clean_fastq/"$sample"_1.fastq \
-#                     {params.output}/clean_fastq/"$sample"_2.fastq \
-#                     > {params.output}/binning/"$sample"/"$sample".alignment.sam
-
-#                 # convert sam to bam 
-#                 samtools view -hb {params.output}/binning/"$sample"/"$sample".alignment.sam | \
-#                 samtools sort -o {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam
-
-#                 # delete sam file 
-#                 rm {params.output}/binning/"$sample"/"$sample".alignment.sam
-
-#                 # Coverage
-#                 metadecoder coverage \
-#                     -b {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam \
-#                     -o {params.output}/binning/"$sample"/"$sample".metadecoder.coverage \
-#                     --threads {params.threads}
-
-#                 # Seed
-#                 metadecoder seed \
-#                     -f {params.output}/assembly/"$sample"/scaffolds.fasta \
-#                     -o {params.output}/binning/"$sample"/"$sample".metadecoder.seed \
-#                     --threads {params.threads}
-                
-#                 # Cluster
-#                     mkdir -p {params.output}/binning/bins
-#                     metadecoder cluster \
-#                         -f {params.output}/assembly/"$sample"/scaffolds.fasta \
-#                         -c {params.output}/binning/"$sample"/"$sample".metadecoder.coverage \
-#                         -s {params.output}/binning/"$sample"/"$sample".metadecoder.seed \
-#                         -o {params.output}/binning/bins/"$sample".bins.tsv
-
-#             else
-#                 # Alignment
-#                 # minimap2 -ax sr -t {params.threads} \
-#                 #     {params.output}/assembly/$sample/final.contigs.fa \
-#                 #     {params.output}/clean_fastq/"$sample"_1.fastq \
-#                 #     {params.output}/clean_fastq/"$sample"_2.fastq \
-#                 #     > {params.output}/binning/"$sample"/"$sample".alignment.sam
-
-#                 # # convert sam to bam 
-#                 # samtools view -hb {params.output}/binning/"$sample"/"$sample".alignment.sam | \
-#                 # samtools sort -o {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam
-
-#                 # # delete sam file 
-#                 # rm {params.output}/binning/"$sample"/"$sample".alignment.sam
-
-#                 # # Coverage
-#                 # metadecoder coverage \
-#                 #     -b {params.output}/binning/"$sample"/"$sample".alignment.sorted.bam \
-#                 #     -o {params.output}/binning/"$sample"/"$sample".metadecoder.coverage \
-#                 #     --threads {params.threads}
-
-#                 # Seed
-#                 # which FragGeneScan
-#                 # which fraggenescan
-#                 # which metadecoder
-#                 # cd $(dirname $(which FragGeneScan))
-#                 # FragGeneScan -s /data/output/assembly/a1/final.contigs.fa -o test_fraggenescan -w 0 -t complete
-#                 # ln -s $(dirname $(which FragGeneScan))/train {params.output}/binning/$sample/train
-
-#                 # metadecoder seed \
-#                 #     -f {params.output}/assembly/"$sample"/final.contigs.fa \
-#                 #     -o {params.output}/binning/"$sample"/"$sample".metadecoder.seed \
-#                 #     --threads {params.threads}
-                
-#                 # # Cluster
-#                 # mkdir -p {params.output}/binning/bins
-#                 # metadecoder cluster \
-#                 #     -f {params.output}/assembly/"$sample"/final.contigs.fa \
-#                 #     -c {params.output}/binning/"$sample"/"$sample".metadecoder.coverage \
-#                 #     -s {params.output}/binning/"$sample"/"$sample".metadecoder.seed \
-#                 #     -o {params.output}/binning/bins/"$sample".bins.tsv
-                    
-#             fi
-        
-#         done < {params.output}/samples.txt
-
-#         # rm -f samples.txt
-#         touch {output}
-#         """
 
 rule download_metaphlan_db:
     output:
@@ -359,7 +265,7 @@ rule download_metaphlan_db:
 
 rule taxonomy:
     input:
-        done = config["output_directory"] + "/.megahit_assembly.done"
+        config["output_directory"] + "/.megahit_assembly.done"
     output:
         config["output_directory"] + "/.metaphlan.taxonomy.done"
     params:
@@ -377,17 +283,67 @@ rule taxonomy:
             basename=$(basename "$r1")
             sample_prefix=$(echo "$basename" | sed 's/_1.fastq$//')
             
+            mkdir -p {params.output}/taxonomy/$sample_prefix
             # seems there is memory problem
             metaphlan $r1,$r2 \
                 --input_type fastq \
                 --bowtie2db {params.metaphlan_db} \
-                --bowtie2out {params.output}/taxonomy/"$sample_prefix".bowtie2.bz2 \
+                --bowtie2out {params.output}/taxonomy/$sample_prefix/"$sample_prefix".bowtie2.bz2 \
                 --nproc {params.threads} \
-                -o {params.output}/taxonomy/"$sample_prefix".profile.txt \
-                > {params.output}/taxonomy/"$sample_prefix".metaphlan.log 2>&1
+                -o {params.output}/taxonomy/$sample_prefix/"$sample_prefix".profile.txt \
+                > {params.output}/taxonomy/$sample_prefix/"$sample_prefix".metaphlan.log 2>&1
         done
 
         touch {output}
         """
 
 
+rule download_chocophlan_db:
+    input:
+        config["output_directory"] + "/.metaphlan.taxonomy.done"
+    output:
+        config["output_directory"] + "/.humann.chocophlan.done"
+    conda:
+        "env/humann.yaml"
+    params:
+        chocophlan_db = config['chocophlan_db']
+    shell:
+        """
+        mkdir -p {params.chocophlan_db}
+        if [[ -z $(ls -A {params.chocophlan_db}) ]]; then 
+            humann_databases --download chocophlan full {params.metaphlan_db}
+        fi
+        touch {output}
+        """
+
+
+rule functional_profiling:
+    input:
+        config["output_directory"] + "/.metaphlan.taxonomy.done"
+    output:
+        config["output_directory"] + "/.humann.done"
+    params:
+        output = config["output_directory"],
+        threads = config["threads"]
+    conda:
+        "env/humann.yaml"
+    shell:
+        """
+        mkdir -p {params.output}/humann
+
+        find {params.output}/clean_fastq -name '*1.fastq' | while read -r r1; do
+            r2=$(echo "$r1" | sed 's/1.fastq$/2.fastq/')
+            basename=$(basename "$r1")
+            sample_prefix=$(echo "$basename" | sed 's/_1.fastq$//')
+
+            mkdir -p {params.output}/humann/$sample_prefix
+
+            humann \
+                --input "$r1","$r2" \
+                --output {params.output}/humann/$sample_prefix \
+                --threads {params.threads} \
+                > {params.output}/humann/$sample_prefix/"$sample_prefix".humann.log 2>&1
+        done
+
+        touch {output}
+        """
