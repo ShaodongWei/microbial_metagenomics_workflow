@@ -1,6 +1,15 @@
+# using conda to install 4.* will fail 
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
-  - metaphlan=4.1.1
+  - python=3.10
+  - pip
+  - bowtie2
+  - numpy
+  - pandas
+  - biopython
+  - pysam  # <-- from conda, pre-built
+  - pip:
+      - metaphlan==4.1.1
