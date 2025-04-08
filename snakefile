@@ -13,10 +13,10 @@ else:
     binning = None
 
 if config['functional_profiling']:
-    functional_profiling = config["output_directory"] + "/.humann.done",
+    functional_profiling = config["output_directory"] + "/.humann.done"
     human_db = config["output_directory"] + "/.humann.chocophlan.done"
 else: 
-    functional_profiling = None,
+    functional_profiling = None
     human_db = None
 
 rule all:
