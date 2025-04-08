@@ -306,8 +306,8 @@ rule download_humann_db:
         humann_db = config['humann_db']
     shell:
         """
-        mkdir -p {params.chocophlan_db}
-        if [[ -z $(ls -A {params.chocophlan_db}) ]]; then 
+        mkdir -p {params.humann_db}
+        if [[ ! -d {params.humann_db} ]]; then 
             humann_databases --download chocophlan full {params.humann_db}
             humann_databases --download uniref uniref90_diamond {params.humann_db}
 
