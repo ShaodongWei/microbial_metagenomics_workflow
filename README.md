@@ -70,7 +70,7 @@ This step is to remove the potential host DNA contamination using bowtie2.
 snakemake remove_host --cores threads_number --use-conda --conda-frontend conda
 ```
 ### Step 3, assembling of short reads into contigs
-This step is to assemble (single sample) the short reads using either spades (meta or isolate mode) or megahit.  You have to specify the assembler in the config.yaml file. 
+This step is to assemble (single sample mode) the short reads using either spades (meta or isolate mode) or megahit.  You have to specify the assembler in the config.yaml file. 
 ```
 snakemake spades_assembly --cores threads_number --use-conda --conda-frontend conda
 or
