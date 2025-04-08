@@ -7,4 +7,4 @@ assembler_mode: 'meta' # if use spades please choose 'meta' or 'isolate'; if use
 run_binning: true # use 'true' or 'false'. so far does not support different binner, only comebin is supported. metadecoder [no further updates, due to no money, not ready to use], or comebin [best in performance, better use GPU because cpu is slow]
 metaphlan_db: '/data/metaphlan_db' # directory to donwload metaphlan4 database. 
 functional_profiling: true # 'true' (using HUMAnN) or 'false'
-chocophlan_db: '/data/chocophlan_db' # chocophlan database for humann
+humann_db: '/data/chocophlan_db' # chocophlan database for humann
