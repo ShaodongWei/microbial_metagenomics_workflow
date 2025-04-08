@@ -324,7 +324,7 @@ rule functional_profiling:
     params:
         output = config["output_directory"],
         threads = config["threads"],
-        chocophlan_db = config['chocophlan_db']
+        humann_db = config['humann_db']
     conda:
         "env/humann.yaml"
     shell:
