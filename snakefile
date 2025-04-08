@@ -238,7 +238,7 @@ rule binning:
             
         done < {params.output}/samples.txt
 
-        rm -f samples.txt
+        rm -f {params.output}/samples.txt
         touch {output}
         """
 
