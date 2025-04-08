@@ -259,9 +259,10 @@ rule download_metaphlan_db:
     shell:
         """
         mkdir -p {params.metaphlan_db}
-        if [[ -z $(ls -A {params.metaphlan_db}) ]]; then 
-            metaphlan --install --bowtie2db {params.metaphlan_db}
-        fi
+        echo $(ls -A {params.metaphlan_db})
+        #if [[ -z $(ls -A {params.metaphlan_db}) ]]; then 
+        #    metaphlan --install --bowtie2db {params.metaphlan_db}
+        #fi
         touch {output}
         """
 
@@ -313,7 +314,7 @@ rule download_chocophlan_db:
         """
         mkdir -p {params.chocophlan_db}
         if [[ -z $(ls -A {params.chocophlan_db}) ]]; then 
-            humann_databases --download chocophlan full {params.metaphlan_db}
+            humann_databases --download chocophlan full {params.chocophlan_db}
         fi
         touch {output}
         """
