@@ -318,7 +318,7 @@ rule download_humann_db:
 
 rule functional_profiling:
     input:
-        config["output_directory"] + "/.humann.chocophlan.done"
+        config["output_directory"] + "/.humann.db.done"
     output:
         config["output_directory"] + "/.humann.done"
     params:
