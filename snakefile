@@ -316,7 +316,7 @@ rule download_chocophlan_db:
 
 rule functional_profiling:
     input:
-        config["output_directory"] + "/.metaphlan.taxonomy.done"
+        config["output_directory"] + "/.humann.chocophlan.done"
     output:
         config["output_directory"] + "/.humann.done"
     params:
