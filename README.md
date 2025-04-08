@@ -11,8 +11,7 @@ we should use snakemake binning --cores 40 --use-conda --conda-frontend conda --
 # Overview
 This pipeline is designed to preprocess microbial metagenomics/isolates genomics sequencing data by applying a series of data manipulation including quality control, host contamination removal, assembling of reads, taxonomy annotation, and functional profiling. The assembling and binning is done within individual samples (single sample mode). 
 
-# Getting Started
-## Prerequisites
+# Prerequisites
 ### Before using the pipeline, ensure you have the following installed:
 Snakemake: [Installation guide](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) 
 
@@ -85,12 +84,12 @@ snakemake binning --cores threads_number --use-conda --conda-frontend conda
 ### Step 5, taxonomy annotation
 This step is to annotate the taxonomic composition of the samples using metaphlan4, it returns both taxonomy and abundances. You need to specify the metaphlan database location in the configure file. 
 ```
-snakemake taxonomy --cores threads_number --use-conda
+snakemake taxonomy --cores threads_number --use-conda --conda-frontend conda
 ```
 ### Step 6, functional profiling 
 This step uses HUMAnN3 to annotate the metabolic function and the pathways involved in the sample. You have to specify if to run this optional step. 
 ```
-snakemake functional_profiling --cores threads_number --use-conda
+snakemake functional_profiling --cores threads_number --use-conda --conda-frontend conda
 ```
 ## 5. Troubleshooting
 
