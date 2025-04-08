@@ -295,7 +295,7 @@ rule taxonomy:
         """
 
 
-rule download_chocophlan_db:
+rule download_humann_db:
     input:
         config["output_directory"] + "/.metaphlan.taxonomy.done"
     output:
@@ -303,12 +303,14 @@ rule download_chocophlan_db:
     conda:
         "env/humann.yaml"
     params:
-        chocophlan_db = config['chocophlan_db']
+        humann_db = config['humann_db']
     shell:
         """
         mkdir -p {params.chocophlan_db}
         if [[ -z $(ls -A {params.chocophlan_db}) ]]; then 
-            humann_databases --download chocophlan full {params.chocophlan_db}
+            humann_databases --download chocophlan full {params.humann_db}
+            humann_databases --download uniref uniref90_diamond {params.humann_db}
+
         fi
         touch {output}
         """
@@ -340,7 +342,8 @@ rule functional_profiling:
                 --input {params.output}/humann/$sample_prefix/concatenated_fastq \
                 --output {params.output}/humann/$sample_prefix \
                 --threads {params.threads} \
-                --nucleotide-database {params.chocophlan_db}/chocophlan \
+                --nucleotide-database {params.humann_db}/chocophlan \
+                --protein-database {params.humann_db}/uniref90 \
                 > {params.output}/humann/$sample_prefix/"$sample_prefix".humann.log 2>&1
             rm {params.output}/humann/$sample_prefix/concatenated_fastq
         done
