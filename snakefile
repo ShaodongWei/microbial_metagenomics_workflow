@@ -14,7 +14,7 @@ else:
 
 if config['functional_profiling']:
     functional_profiling = config["output_directory"] + "/.humann.done"
-    human_db = config["output_directory"] + "/.humann.chocophlan.done"
+    human_db = config["output_directory"] + "/.humann.db.done"
 else: 
     functional_profiling = None
     human_db = None
@@ -299,7 +299,7 @@ rule download_humann_db:
     input:
         config["output_directory"] + "/.metaphlan.taxonomy.done"
     output:
-        config["output_directory"] + "/.humann.chocophlan.done"
+        config["output_directory"] + "/.humann.db.done"
     conda:
         "env/humann.yaml"
     params:
