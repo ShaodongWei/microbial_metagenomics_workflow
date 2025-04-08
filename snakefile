@@ -343,7 +343,7 @@ rule functional_profiling:
                 --output {params.output}/humann/$sample_prefix \
                 --threads {params.threads} \
                 --nucleotide-database {params.humann_db}/chocophlan \
-                --protein-database {params.humann_db}/uniref90 \
+                --protein-database {params.humann_db}/uniref \
                 > {params.output}/humann/$sample_prefix/"$sample_prefix".humann.log 2>&1
             rm {params.output}/humann/$sample_prefix/concatenated_fastq
         done
