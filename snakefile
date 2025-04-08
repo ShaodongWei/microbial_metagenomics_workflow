@@ -321,7 +321,8 @@ rule functional_profiling:
         config["output_directory"] + "/.humann.done"
     params:
         output = config["output_directory"],
-        threads = config["threads"]
+        threads = config["threads"],
+        chocophlan_db = config['chocophlan_db']
     conda:
         "env/humann.yaml"
     shell:
@@ -339,6 +340,7 @@ rule functional_profiling:
                 --input {params.output}/humann/$sample_prefix/concatenated_fastq \
                 --output {params.output}/humann/$sample_prefix \
                 --threads {params.threads} \
+                --nucleotide-database {params.chocophlan_db} \
                 > {params.output}/humann/$sample_prefix/"$sample_prefix".humann.log 2>&1
             rm {params.output}/humann/$sample_prefix/concatenated_fastq
         done
