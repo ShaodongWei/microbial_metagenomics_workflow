@@ -334,9 +334,8 @@ rule functional_profiling:
             sample_prefix=$(echo "$basename" | sed 's/_1.fastq$//')
 
             mkdir -p {params.output}/humann/$sample_prefix
-
-            humann \
-                --input "$r1","$r2" \
+            cat "$r1" "$r2" | humann \
+                --input - \
                 --output {params.output}/humann/$sample_prefix \
                 --threads {params.threads} \
                 > {params.output}/humann/$sample_prefix/"$sample_prefix".humann.log 2>&1
