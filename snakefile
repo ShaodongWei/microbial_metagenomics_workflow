@@ -262,7 +262,7 @@ rule download_metaphlan_db:
 
 rule taxonomy:
     input:
-        assembly
+        config["output_directory"] + "/.metaphlan.db.done"
     output:
         config["output_directory"] + "/.metaphlan.taxonomy.done"
     params:
