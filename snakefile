@@ -19,8 +19,6 @@ else:
     functional_profiling = None,
     human_db = None
 
-
-
 rule all:
     input:
         config["output_directory"] + "/.fastp_trim.done",
@@ -33,9 +31,6 @@ rule all:
         functional_profiling if config['functional_profiling'] else [],
         human_db if config['functional_profiling'] else []
         
-
-
-
 rule fastp_trim:
     input:
         input=config['input_directory']
@@ -259,10 +254,9 @@ rule download_metaphlan_db:
     shell:
         """
         mkdir -p {params.metaphlan_db}
-        echo $(ls -A {params.metaphlan_db})
-        #if [[ -z $(ls -A {params.metaphlan_db}) ]]; then 
-        #    metaphlan --install --bowtie2db {params.metaphlan_db}
-        #fi
+        if [[ -z $(ls -A {params.metaphlan_db}) ]]; then 
+            metaphlan --install --bowtie2db {params.metaphlan_db}
+        fi
         touch {output}
         """
 
