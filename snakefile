@@ -248,6 +248,8 @@ rule binning:
         """
 
 rule download_metaphlan_db:
+    input:
+        assembly
     output:
         config["output_directory"] + "/.metaphlan.db.done"
     conda:
@@ -265,7 +267,7 @@ rule download_metaphlan_db:
 
 rule taxonomy:
     input:
-        config["output_directory"] + "/.megahit_assembly.done"
+        assembly
     output:
         config["output_directory"] + "/.metaphlan.taxonomy.done"
     params:
