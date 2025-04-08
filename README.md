@@ -99,8 +99,14 @@ This normally happens when you run snakemake multiple times, you can unlock it b
 rm .snakemake/locks
 ```
 ### 5.2 Run a specific step, without dependency steps
-For example, if you want to run mapping specifically, without running all previous steps, you can use touch to update the timestamp of the .done file for the previous step which is quality_control rule to let Snakemake think it’s up-to-date and previous step has been done. 
+For example, if you want to run a step specifically, without running all previous steps, you can use touch to update the timestamp of the .done file from the previous step. 
 ```
-touch output/.fastp_trim.done
+touch output/.previous_step.done
 ```
+### 5.3 Run based on files timestamp
+For example, 
+```
+snakemake --cores 40 --use-conda --conda-frontend conda --rerun-triggers mtime
+```
+
 
