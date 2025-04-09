@@ -1,7 +1,7 @@
 input_directory: "/data/mini_data" # files has to be file_1.fastq or file_2.fastq
 output_directory: "/data/output"
 host_genome: "/data/ecoli_genome/GCA_000005845.2_ASM584v2_genomic.fna"
-threads: 12
+threads: 40
 assembler: "megahit"  # Options: spades or megahit
 assembler_mode: 'meta' # if use spades please choose 'meta' or 'isolate'; if use assembler megahit, it is only for metagenomics. 
 run_binning: true # use 'true' or 'false'. so far does not support different binner, only comebin is supported. metadecoder [no further updates, due to no money, not ready to use], or comebin [best in performance, better use GPU because cpu is slow]
