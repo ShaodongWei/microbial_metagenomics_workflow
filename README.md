@@ -28,7 +28,7 @@ assembler_mode: 'meta' # if use spades please choose 'meta' or 'isolate'; if use
 run_binning: true # use 'true' or 'false'. The supported binner is SemiBin2. 
 metaphlan_db: '/path/to/metaphlan_db' # directory to donwload metaphlan4 database. 
 functional_profiling: true # 'true' (using HUMAnN) or 'false'
-chocophlan_db: '/data/chocophlan_db' # chocophlan database for humann
+humann_db: '/path/to/humannn_db' # chocophlan and uniref90 database for humann
 ```
 
 ## 3. Run the pipeline using snakemake
